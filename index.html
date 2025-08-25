@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bite Wise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #eaf1e8;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .modal {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-[#eaf1e8]">
+    <!-- Main Application Container -->
+    <div id="app" class="relative min-h-screen flex flex-col items-center">
+
+        <!-- Header -->
+        <header class="w-full h-16 bg-white shadow-md flex items-center justify-between px-6 md:px-12 fixed top-0 z-10">
+            <div class="flex items-center space-x-2">
+                <h1 class="text-2xl font-bold text-[#558661]">Bite Wise</h1>
+            </div>
+            <div class="relative flex-grow mx-4 max-w-sm">
+                <input type="text" id="searchInput" placeholder="Search products..." class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#558661]">
+                <!-- Search Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- Import Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500 cursor-not-allowed" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                <!-- Export Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500 cursor-not-allowed" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <!-- Scan Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500 cursor-not-allowed" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                <button id="addProductBtn" class="bg-[#558661] text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-[#436a51] transition-colors">
+                    Add Product
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="mt-20 p-4 md:p-8 w-full container">
+
+            <!-- Page 1: Product Categories -->
+            <div id="categoriesPage" class="w-full">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-[#3d5a44] mb-2">Product Categories</h2>
+                    <p class="text-gray-600">Select a category to view its products.</p>
+                </div>
+                <!-- Categories Grid -->
+                <div id="categoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Category cards will be dynamically generated here -->
+                </div>
+            </div>
+
+            <!-- Page 2: Product List for a specific category -->
+            <div id="productListPage" class="w-full hidden">
+                <!-- Header for product list -->
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center space-x-2">
+                        <button id="backBtn" class="p-2 rounded-full hover:bg-gray-200 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                        </button>
+                        <h2 id="categoryTitle" class="text-3xl font-bold text-[#3d5a44]">Category Name (0)</h2>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button id="deleteSelectedBtn" class="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-red-600 transition-colors hidden">
+                            Delete (0)
+                        </button>
+                        <div class="relative">
+                            <input type="text" id="categorySearchInput" placeholder="Search in this category..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#558661]">
+                        </div>
+                        <button id="selectAllBtn" class="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors">
+                            <input type="checkbox" id="selectAllCheckbox" class="h-4 w-4 rounded border-gray-300 text-[#558661] focus:ring-[#558661]">
+                            <span>Select All Shown</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Product list container -->
+                <div id="productList" class="space-y-4">
+                    <!-- Product cards will be dynamically generated here -->
+                </div>
+            </div>
+
+            <!-- Modal for adding a new product (hidden by default) -->
+            <div id="addProductModal" class="modal fixed inset-0 z-20 flex items-center justify-center hidden">
+                <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-lg mx-4">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 id="modalTitle" class="text-2xl font-bold text-[#3d5a44]">Add New Product</h3>
+                        <button id="closeModalBtn" class="text-gray-400 hover:text-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="text-gray-500 mb-6">Fill in the details of the new product.</p>
+
+                    <form id="productForm">
+                        <input type="hidden" id="productId">
+                        <div class="space-y-4">
+                            <!-- Product Name -->
+                            <div>
+                                <label for="productName" class="block text-sm font-medium text-gray-700">Product Name</label>
+                                <input type="text" id="productName" required placeholder="e.g., Organic Apples" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#558661] focus:ring-[#558661]">
+                            </div>
+                            <!-- Category -->
+                            <div>
+                                <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                                <select id="category" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#558661] focus:ring-[#558661]">
+                                    <option value="">Select a category</option>
+                                    <option value="produce">Produce</option>
+                                    <option value="meat">Meat/Seafood</option>
+                                    <option value="dairy">Dairy</option>
+                                    <option value="bakery">Bakery</option>
+                                    <option value="pantry">Pantry</option>
+                                    <option value="frozen">Frozen</option>
+                                    <option value="beverages">Beverages</option>
+                                    <option value="deli">Deli</option>
+                                    <option value="snacks">Snacks</option>
+                                </select>
+                            </div>
+                            <!-- Dates Grid -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="manufactureDate" class="block text-sm font-medium text-gray-700">Manufacture Date</label>
+                                    <input type="date" id="manufactureDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#558661] focus:ring-[#558661]">
+                                </div>
+                                <div>
+                                    <label for="expirationDate" class="block text-sm font-medium text-gray-700">Expiration Date</label>
+                                    <input type="date" id="expirationDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#558661] focus:ring-[#558661]">
+                                </div>
+                                <div>
+                                    <label for="bestBeforeDate" class="block text-sm font-medium text-gray-700">Best Before Date</label>
+                                    <input type="date" id="bestBeforeDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#558661] focus:ring-[#558661]">
+                                </div>
+                                <div>
+                                    <label for="consumeBeforeDate" class="block text-sm font-medium text-gray-700">Consume Before Date</label>
+                                    <input type="date" id="consumeBeforeDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#558661] focus:ring-[#558661]">
+                                </div>
+                            </div>
+                            <!-- Shelf Life -->
+                            <div>
+                                <label for="shelfLife" class="block text-sm font-medium text-gray-700">Shelf Life (days)</label>
+                                <input type="number" id="shelfLife" placeholder="e.g., 7" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#558661] focus:ring-[#558661]">
+                            </div>
+                            <!-- Storage & Preparation Warnings -->
+                            <div>
+                                <label for="storageWarnings" class="block text-sm font-medium text-gray-700">Storage & Preparation Warnings</label>
+                                <textarea id="storageWarnings" rows="3" placeholder="e.g., Keep refrigerated. Cook thoroughly before eating." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#558661] focus:ring-[#558661]"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Modal Buttons -->
+                        <div class="mt-8 flex justify-end space-x-3">
+                            <button type="button" id="cancelModalBtn" class="px-4 py-2 rounded-lg text-gray-600 font-medium hover:bg-gray-100 transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" id="submitModalBtn" class="px-4 py-2 rounded-lg bg-[#558661] text-white font-medium hover:bg-[#436a51] transition-colors">
+                                Add Product
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript for interactivity -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const categoriesPage = document.getElementById('categoriesPage');
+            const productListPage = document.getElementById('productListPage');
+            const categoriesGrid = document.getElementById('categoriesGrid');
+            const productList = document.getElementById('productList');
+            const addProductBtn = document.getElementById('addProductBtn');
+            const addProductModal = document.getElementById('addProductModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const cancelModalBtn = document.getElementById('cancelModalBtn');
+            const productForm = document.getElementById('productForm');
+            const modalTitle = document.getElementById('modalTitle');
+            const submitModalBtn = document.getElementById('submitModalBtn');
+            const backBtn = document.getElementById('backBtn');
+            const categoryTitle = document.getElementById('categoryTitle');
+            const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const categorySearchInput = document.getElementById('categorySearchInput');
+
+            // Global state
+            let allProducts = [];
+            let currentCategory = '';
+            let selectedProducts = new Set();
+            const CATEGORY_MAP = {
+                produce: { emoji: '🍎', name: 'Produce' },
+                meat: { emoji: '🥩', name: 'Meat/Seafood' },
+                dairy: { emoji: '🥛', name: 'Dairy' },
+                bakery: { emoji: '🍰', name: 'Bakery' },
+                pantry: { emoji: '🥫', name: 'Pantry' },
+                frozen: { emoji: '❄️', name: 'Frozen' },
+                beverages: { emoji: '🥤', name: 'Beverages' },
+                deli: { emoji: '🥪', name: 'Deli' },
+                snacks: { emoji: '🍿', name: 'Snacks' }
+            };
+
+            // Initial data check and load
+            const loadData = () => {
+                const storedProducts = localStorage.getItem('allProducts');
+                if (storedProducts) {
+                    allProducts = JSON.parse(storedProducts);
+                } else {
+                    // Default items if local storage is empty
+                    allProducts = [
+                        { id: crypto.randomUUID(), name: 'Organic Bananas', category: 'produce', mfgDate: '2024-07-20', useByDate: '2024-07-28', status: 'Expired', shelfLife: 7, warnings: 'Store at room temperature.' },
+                        { id: crypto.randomUUID(), name: 'Free-Range Chicken Breast', category: 'meat', mfgDate: '2024-07-22', expDate: '2024-07-26', status: 'Expired', warnings: 'Keep refrigerated. Cook to an internal temperature of 165°F.' },
+                        { id: crypto.randomUUID(), name: 'Whole Milk', category: 'dairy', mfgDate: '2024-07-15', expDate: '2024-07-30', status: 'Expired', warnings: 'Refrigerate after opening.' },
+                        { id: crypto.randomUUID(), name: 'Sourdough Bread', category: 'bakery', mfgDate: '2024-07-23', bestBeforeDate: '2024-07-27', status: 'Fresh', warnings: '' },
+                        { id: crypto.randomUUID(), name: 'Canned Tuna', category: 'pantry', mfgDate: '2023-01-10', expDate: '2026-01-10', status: 'Fresh', shelfLife: 1095, warnings: 'Store in a cool, dry place.' },
+                    ];
+                    saveData();
+                }
+            };
+
+            // Save data to local storage
+            const saveData = () => {
+                localStorage.setItem('allProducts', JSON.stringify(allProducts));
+                updateCategoryCards();
+            };
+
+            // Date helper function to check if a product is expired
+            const isExpired = (product) => {
+                const today = new Date();
+                if (product.expDate) {
+                    return new Date(product.expDate) < today;
+                }
+                if (product.bestBeforeDate) {
+                    return new Date(product.bestBeforeDate) < today;
+                }
+                if (product.useByDate) {
+                    return new Date(product.useByDate) < today;
+                }
+                return false;
+            };
+
+            // Render category cards on the main page
+            const updateCategoryCards = () => {
+                categoriesGrid.innerHTML = '';
+                const categories = Object.keys(CATEGORY_MAP);
+
+                categories.forEach(catKey => {
+                    const categoryData = allProducts.filter(p => p.category === catKey);
+                    const expiredCount = categoryData.filter(isExpired).length;
+                    const totalCount = categoryData.length;
+
+                    const statusClass = expiredCount > 0 ? 'text-red-500' : 'text-[#558661]';
+                    const statusText = expiredCount > 0 ? `${expiredCount} expired` : (totalCount > 0 ? 'All items are fresh' : '0 items');
+                    const statusIcon = expiredCount > 0 ? `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4.755a1.5 1.5 0 01-1.354-2.203l7.04-12.062a1.5 1.5 0 012.708 0l7.04 12.062a1.5 1.5 0 01-1.354 2.203H5.062z" />
+                        </svg>
+                    ` : `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    `;
+
+                    const cardHtml = `
+                        <div class="bg-white rounded-xl shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow category-card" data-category="${catKey}">
+                            <div class="flex flex-col items-center text-center">
+                                <span class="text-6xl mb-4">${CATEGORY_MAP[catKey].emoji}</span>
+                                <h3 class="text-xl font-semibold mb-1">${CATEGORY_MAP[catKey].name}</h3>
+                                <p class="text-gray-500">${totalCount} item${totalCount !== 1 ? 's' : ''}</p>
+                                <div class="flex items-center ${statusClass} mt-4 font-medium">
+                                    ${statusIcon}
+                                    <span>${statusText}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    categoriesGrid.innerHTML += cardHtml;
+                });
+
+                document.querySelectorAll('.category-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        const category = e.currentTarget.dataset.category;
+                        currentCategory = category;
+                        showPage('list');
+                    });
+                });
+            };
+
+            // Render product list for a specific category
+            const renderProductList = (category) => {
+                productList.innerHTML = '';
+                selectedProducts.clear();
+                updateDeleteButton();
+                selectAllCheckbox.checked = false;
+
+                categoryTitle.textContent = `${CATEGORY_MAP[category].name} (${allProducts.filter(p => p.category === category).length})`;
+                const productsToDisplay = allProducts.filter(p => p.category === category);
+
+                productsToDisplay.forEach(product => {
+                    const isProdExpired = isExpired(product);
+                    const statusClass = isProdExpired ? 'bg-red-200 text-red-700' : 'bg-green-200 text-green-700';
+                    const statusText = isProdExpired ? 'Expired' : 'Fresh';
+
+                    const dates = [];
+                    if (product.mfgDate) dates.push({ label: 'MFG', date: product.mfgDate });
+                    if (product.expDate) dates.push({ label: 'EXP', date: product.expDate });
+                    if (product.bestBeforeDate) dates.push({ label: 'Best By', date: product.bestBeforeDate });
+                    if (product.useByDate) dates.push({ label: 'Use By', date: product.useByDate });
+
+                    const dateHtml = dates.map(d => `
+                        <div class="flex items-center space-x-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h.01M16 14h.01M16 11h.01M16 8h.01m-10.99 10h12a2 2 0 002-2v-12a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span>${d.label}: ${d.date}</span>
+                        </div>
+                    `).join('');
+
+                    const productCardHtml = `
+                        <div class="bg-white rounded-xl shadow-md p-6 flex items-start space-x-4 product-card" data-id="${product.id}">
+                            <input type="checkbox" class="h-6 w-6 mt-1 rounded border-gray-300 text-[#558661] focus:ring-[#558661] product-checkbox">
+                            <div class="flex-grow">
+                                <h3 class="text-2xl font-semibold text-[#3d5a44]">${product.name}</h3>
+                                <p class="text-sm text-gray-500">${CATEGORY_MAP[product.category].name}</p>
+                                <div class="${statusClass} font-semibold text-sm px-2 py-0.5 rounded-full inline-block mt-2">
+                                    ${statusText}
+                                </div>
+                                <div class="flex items-center text-gray-600 space-x-4 mt-4 text-sm">
+                                    ${dateHtml}
+                                </div>
+                                ${product.shelfLife ? `<p class="text-sm text-gray-600 mt-2">Shelf Life: ${product.shelfLife} days</p>` : ''}
+                                ${product.warnings ? `
+                                    <div class="mt-4">
+                                        <p class="text-gray-700 font-semibold flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Reminders
+                                        </p>
+                                        <p class="text-sm text-gray-600 mt-1">${product.warnings}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <!-- Edit/Delete Icons -->
+                            <div class="flex space-x-2">
+                                <button class="p-2 rounded-full hover:bg-gray-200 transition-colors edit-btn" data-id="${product.id}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232a2.5 2.5 0 013.536 3.536l-8.061 8.061L5 17.5V13.738l8.061-8.061z" />
+                                    </svg>
+                                </button>
+                                <button class="p-2 rounded-full hover:bg-gray-200 transition-colors delete-btn" data-id="${product.id}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-2 14H7L5 7m4 0V5a1 1 0 011-1h4a1 1 0 011 1v2M8 7h8" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    productList.innerHTML += productCardHtml;
+                });
+                
+                // Add event listeners to newly rendered elements
+                addListEventListeners();
+            };
+
+            // Event listeners for product list
+            const addListEventListeners = () => {
+                // Checkbox change listener
+                document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const card = e.target.closest('.product-card');
+                        const id = card.dataset.id;
+                        if (e.target.checked) {
+                            selectedProducts.add(id);
+                        } else {
+                            selectedProducts.delete(id);
+                        }
+                        updateDeleteButton();
+                        const visibleCheckboxes = document.querySelectorAll('#productList .product-checkbox');
+                        selectAllCheckbox.checked = visibleCheckboxes.length > 0 && Array.from(visibleCheckboxes).every(cb => cb.checked);
+                    });
+                });
+
+                // Edit button listener
+                document.querySelectorAll('.edit-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = e.currentTarget.dataset.id;
+                        openModal(id);
+                    });
+                });
+
+                // Delete button listener
+                document.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = e.currentTarget.dataset.id;
+                        deleteProducts([id]);
+                    });
+                });
+            };
+
+            // Update delete button text and visibility
+            const updateDeleteButton = () => {
+                if (selectedProducts.size > 0) {
+                    deleteSelectedBtn.textContent = `Delete (${selectedProducts.size})`;
+                    deleteSelectedBtn.classList.remove('hidden');
+                } else {
+                    deleteSelectedBtn.classList.add('hidden');
+                }
+            };
+
+            // Delete products from the array
+            const deleteProducts = (idsToDelete) => {
+                allProducts = allProducts.filter(p => !idsToDelete.includes(p.id));
+                saveData();
+                renderProductList(currentCategory);
+            };
+
+            // Function to show a page and hide others
+            const showPage = (pageName) => {
+                categoriesPage.classList.add('hidden');
+                productListPage.classList.add('hidden');
+                
+                if (pageName === 'categories') {
+                    categoriesPage.classList.remove('hidden');
+                    updateCategoryCards();
+                } else if (pageName === 'list') {
+                    productListPage.classList.remove('hidden');
+                    renderProductList(currentCategory);
+                }
+            };
+
+            // Open the modal for adding or editing a product
+            const openModal = (id = null) => {
+                productForm.reset();
+                if (id) {
+                    modalTitle.textContent = 'Edit Product';
+                    submitModalBtn.textContent = 'Save Changes';
+                    const product = allProducts.find(p => p.id === id);
+                    if (product) {
+                        document.getElementById('productId').value = product.id;
+                        document.getElementById('productName').value = product.name;
+                        document.getElementById('category').value = product.category;
+                        document.getElementById('manufactureDate').value = product.mfgDate || '';
+                        document.getElementById('expirationDate').value = product.expDate || '';
+                        document.getElementById('bestBeforeDate').value = product.bestBeforeDate || '';
+                        document.getElementById('consumeBeforeDate').value = product.useByDate || '';
+                        document.getElementById('shelfLife').value = product.shelfLife || '';
+                        document.getElementById('storageWarnings').value = product.warnings || '';
+                    }
+                } else {
+                    modalTitle.textContent = 'Add New Product';
+                    submitModalBtn.textContent = 'Add Product';
+                }
+                addProductModal.classList.remove('hidden');
+            };
+
+            // Event listeners
+            addProductBtn.addEventListener('click', () => openModal());
+            closeModalBtn.addEventListener('click', () => addProductModal.classList.add('hidden'));
+            cancelModalBtn.addEventListener('click', () => addProductModal.classList.add('hidden'));
+            backBtn.addEventListener('click', () => showPage('categories'));
+
+            productForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = document.getElementById('productId').value;
+                const newProduct = {
+                    id: id || crypto.randomUUID(),
+                    name: document.getElementById('productName').value,
+                    category: document.getElementById('category').value,
+                    mfgDate: document.getElementById('manufactureDate').value,
+                    expDate: document.getElementById('expirationDate').value,
+                    bestBeforeDate: document.getElementById('bestBeforeDate').value,
+                    useByDate: document.getElementById('consumeBeforeDate').value,
+                    shelfLife: document.getElementById('shelfLife').value,
+                    warnings: document.getElementById('storageWarnings').value,
+                };
+                
+                // Update product status based on dates
+                newProduct.status = isExpired(newProduct) ? 'Expired' : 'Fresh';
+
+                if (id) {
+                    // Editing existing product
+                    const index = allProducts.findIndex(p => p.id === id);
+                    if (index !== -1) {
+                        allProducts[index] = newProduct;
+                    }
+                } else {
+                    // Adding new product
+                    allProducts.push(newProduct);
+                }
+                saveData();
+                addProductModal.classList.add('hidden');
+                showPage('list'); // Re-render the current category list
+            });
+
+            deleteSelectedBtn.addEventListener('click', () => {
+                if (selectedProducts.size > 0) {
+                    deleteProducts(Array.from(selectedProducts));
+                }
+            });
+
+            selectAllCheckbox.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                document.querySelectorAll('#productList .product-checkbox').forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                    const card = checkbox.closest('.product-card');
+                    const id = card.dataset.id;
+                    if (isChecked) {
+                        selectedProducts.add(id);
+                    } else {
+                        selectedProducts.delete(id);
+                    }
+                });
+                updateDeleteButton();
+            });
+
+            // Initial app load
+            loadData();
+            showPage('categories');
+        });
+    </script>
+</body>
+</html>
+�
